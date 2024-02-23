@@ -26,40 +26,70 @@ similarity = cosine_similarity(feature_vectors)
 # Function to get movie recommendations
 def get_movie_recommendations(movie_name):
     list_of_all_titles = movies_data['title'].tolist()
-    find_close_match = difflib.get_close_matches(movie_name, list_of_all_titles)
+    
+    # Convert both movie_name and list_of_all_titles to lowercase for case-insensitive matching
+    movie_name_lower = movie_name.lower()
+    list_of_all_titles_lower = [title.lower() for title in list_of_all_titles]
+
+    find_close_match = difflib.get_close_matches(movie_name_lower, list_of_all_titles_lower, n=1, cutoff=0.6)
 
     if not find_close_match:
         st.warning(f"No close match found for '{movie_name}'. Please try a different movie.")
         return []
 
-    close_match = find_close_match[0]
+    close_match_lower = find_close_match[0]
+    
+    # Find the corresponding original title from the lowercase close match
+    close_match_index = list_of_all_titles_lower.index(close_match_lower)
+    close_match = list_of_all_titles[close_match_index]
+    
     index_of_the_movie = movies_data[movies_data.title == close_match]['index'].values[0]
 
     similarity_score = list(enumerate(similarity[index_of_the_movie]))
     sorted_similar_movies = sorted(similarity_score, key=lambda x: x[1], reverse=True)
 
-    return sorted_similar_movies
+    # Exclude the input movie from recommendations
+    filtered_recommendations = [movie for movie in sorted_similar_movies if movies_data.iloc[movie[0]]['title'].lower() != movie_name_lower]
 
-# Streamlit app with some styling
-st.title("Movie Recommendation System")
+    return filtered_recommendations
 
-# Image strip
+
+# Streamlit app with enhanced styling
+st.set_page_config(page_title="Movie Recommendation System", page_icon="🎬", layout="wide")
+
+# Sidebar with image strip
+st.sidebar.title("My personal favourite movies")
 image_urls = [
-    "https://upload.wikimedia.org/wikipedia/en/2/2d/Vanilla_Sky_poster.png",
-    "https://upload.wikimedia.org/wikipedia/en/7/7b/Goodfellas.jpg",
+    "https://m.media-amazon.com/images/M/MV5BYjZlYmJjYWYtZDM0NS00YmZlLWIyMTAtMDY5ZTNjZTgwMDhjXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UY209_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BMjc4OTc0ODgwNV5BMl5BanBnXkFtZTcwNjM1ODE0MQ@@._V1_UY209_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BY2NkZjEzMDgtN2RjYy00YzM1LWI4ZmQtMjIwYjFjNmI3ZGEwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_UX140_CR0,0,140,209_AL_.jpg",
     "https://m.media-amazon.com/images/M/MV5BMDJhMGRjN2QtNDUxYy00NGM3LThjNGQtMmZiZTRhNjM4YzUxL2ltYWdlL2ltYWdlXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UY209_CR0,0,140,209_AL_.jpg",
-    "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_UX140_CR0,0,140,209_AL_.jpg",
-
+    "https://m.media-amazon.com/images/M/MV5BY2JiYTNmZTctYTQ1OC00YjU4LWEwMjYtZjkwY2Y5MDI0OTU3XkEyXkFqcGdeQXVyNTI4MzE4MDU@._V1_UY209_CR0,0,140,209_AL_.jpg",
     "https://m.media-amazon.com/images/M/MV5BNzM3NDFhYTAtYmU5Mi00NGRmLTljYjgtMDkyODQ4MjNkMGY2XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_UX140_CR0,0,140,209_AL_.jpg",
     "https://m.media-amazon.com/images/M/MV5BYzMzNTJjYmMtZTkxNS00MjI4LWI3YmQtOTQ4MDZjZDJlZjQyXkEyXkFqcGdeQXVyNjc0NzQzNTM@._V1_UY209_CR0,0,140,209_AL_.jpg",
     "https://m.media-amazon.com/images/M/MV5BMDJlZWZiODItMGE3NC00Yzg3LWFhYTYtZTI2YWNlNjExMDE4XkEyXkFqcGdeQXVyMTA0MjU0Ng@@._V1_UY209_CR2,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BNDc2MzNkMjMtZDY5NC00NmQ0LWI1NjctZjRhNWIzZjc4MGRiXkEyXkFqcGdeQXVyMjkwOTAyMDU@._V1_UY209_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BZWFlZjE5OTYtNWY0ZC00MzgzLTg5MjUtYTFkZjk2NjJkYjM0XkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_UX140_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BNzQzMzJhZTEtOWM4NS00MTdhLTg0YjgtMjM4MDRkZjUwZDBlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_UY209_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BY2IzNGNiODgtOWYzOS00OTI0LTgxZTUtOTA5OTQ5YmI3NGUzXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_UX140_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BNGNjNjU1YmEtZGM5MC00ODgzLWEyY2MtZmZmNTlhOGU4OWJjXkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_UY209_CR9,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BODZiMzAxNTctZjdiZC00OGY5LTg2NDAtNWJhNmQwZTcyMWQ2XkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_UY209_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BODcxMzY3ODY1NF5BMl5BanBnXkFtZTgwNzg1NDY4MTE@._V1_UX140_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BMWRmYjY1NTUtNjNlMC00MDFjLTk0MTYtZWVlMTFhMjllYjUzXkEyXkFqcGdeQXVyMTUzMDUzNTI3._V1_UY209_CR1,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BNjJlYmNkZGItM2NhYy00MjlmLTk5NmQtNjg1NmM2ODU4OTMwXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_UX140_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BYTYxNGMyZTYtMjE3MS00MzNjLWFjNmYtMDk3N2FmM2JiM2M1XkEyXkFqcGdeQXVyNjY5NDU4NzI@._V1_UY209_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_UY209_CR0,0,140,209_AL_.jpg",
+    "https://m.media-amazon.com/images/M/MV5BMTcwNTE4MTUxMl5BMl5BanBnXkFtZTcwMDIyODM4OA@@._V1_UY209_CR0,0,140,209_AL_.jpg",
 ]
+st.sidebar.image(image_urls, width=100)
 
-st.image(image_urls, width=100)
+# Main content
+st.title("Explore Movies and Get Recommendations🍿")
 
 # User input form
 with st.form("movie_input_form"):
-    movie_name = st.text_input("Enter your favorite movie name:")
+    st.subheader("Enter Your Favorite Movie:")
+    movie_name = st.text_input("Movie Name", placeholder="E.g., The Shawshank Redemption")
     st.form_submit_button("Get Recommendations")
 
 # Button to trigger recommendations
@@ -67,12 +97,9 @@ if movie_name:
     recommendations = get_movie_recommendations(movie_name)
 
     # Display recommendations
-    st.subheader("Movies suggested for you:")
+    st.subheader("Movies Suggested for You:")
     if recommendations:
-        # Filter out the entered movie from recommendations
-        filtered_recommendations = [movie for movie in recommendations if movies_data.iloc[movie[0]]['title'] != movie_name]
-        
-        for i, movie in enumerate(filtered_recommendations[:10], start=1):
+        for i, movie in enumerate(recommendations[:10], start=1):
             index = movie[0]
             title_from_index = movies_data[movies_data.index == index]['title'].values[0]
             st.write(f"{i}. {title_from_index}")
