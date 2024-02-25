@@ -4,10 +4,10 @@ import difflib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load the data
+
 movies_data = pd.read_csv(r'C:\Users\Ashut\OneDrive\Desktop\Movie_Recommendation_System\movies.csv')
 
-# Preprocess the data
+
 selected_features = ['genres', 'keywords', 'tagline', 'cast', 'director']
 
 for feature in selected_features:
@@ -16,18 +16,18 @@ for feature in selected_features:
 combined_features = movies_data['genres'] + ' ' + movies_data['keywords'] + ' ' + movies_data['tagline'] + ' ' + \
                     movies_data['cast'] + ' ' + movies_data['director']
 
-# Convert text data to feature vectors
+
 vectorizer = TfidfVectorizer()
 feature_vectors = vectorizer.fit_transform(combined_features)
 
-# Get similarity scores using cosine similarity
+
 similarity = cosine_similarity(feature_vectors)
 
-# Function to get movie recommendations
+
 def get_movie_recommendations(movie_name):
     list_of_all_titles = movies_data['title'].tolist()
     
-    # Convert both movie_name and list_of_all_titles to lowercase for case-insensitive matching
+    
     movie_name_lower = movie_name.lower()
     list_of_all_titles_lower = [title.lower() for title in list_of_all_titles]
 
@@ -39,7 +39,7 @@ def get_movie_recommendations(movie_name):
 
     close_match_lower = find_close_match[0]
     
-    # Find the corresponding original title from the lowercase close match
+    
     close_match_index = list_of_all_titles_lower.index(close_match_lower)
     close_match = list_of_all_titles[close_match_index]
     
@@ -48,16 +48,16 @@ def get_movie_recommendations(movie_name):
     similarity_score = list(enumerate(similarity[index_of_the_movie]))
     sorted_similar_movies = sorted(similarity_score, key=lambda x: x[1], reverse=True)
 
-    # Exclude the input movie from recommendations
+    
     filtered_recommendations = [movie for movie in sorted_similar_movies if movies_data.iloc[movie[0]]['title'].lower() != movie_name_lower]
 
     return filtered_recommendations
 
 
-# Streamlit app with enhanced styling
+
 st.set_page_config(page_title="Movie Recommendation System", page_icon="🎬", layout="wide")
 
-# Sidebar with image strip
+
 st.sidebar.title("Some movies to choose from")
 image_urls = [
     "https://m.media-amazon.com/images/M/MV5BYjZlYmJjYWYtZDM0NS00YmZlLWIyMTAtMDY5ZTNjZTgwMDhjXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UY209_CR0,0,140,209_AL_.jpg",
@@ -83,20 +83,19 @@ image_urls = [
 ]
 st.sidebar.image(image_urls, width=100)
 
-# Main content
+
 st.title("Explore Movies and Get Recommendations🍿")
 
-# User input form
 with st.form("movie_input_form"):
     st.subheader("Enter Your Favorite Movie:")
     movie_name = st.text_input("Movie Name", placeholder="E.g., The Shawshank Redemption")
     st.form_submit_button("Get Recommendations")
 
-# Button to trigger recommendations
+
 if movie_name:
     recommendations = get_movie_recommendations(movie_name)
 
-    # Display recommendations
+    
     st.subheader("Movies Suggested for You:")
     if recommendations:
         for i, movie in enumerate(recommendations[:10], start=1):
