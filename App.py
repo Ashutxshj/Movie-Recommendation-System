@@ -58,7 +58,7 @@ def get_movie_recommendations(movie_name):
 st.set_page_config(page_title="Movie Recommendation System", page_icon="🎬", layout="wide")
 
 # Sidebar with image strip
-st.sidebar.title("My personal favourite movies")
+st.sidebar.title("Some movies to choose from")
 image_urls = [
     "https://m.media-amazon.com/images/M/MV5BYjZlYmJjYWYtZDM0NS00YmZlLWIyMTAtMDY5ZTNjZTgwMDhjXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UY209_CR0,0,140,209_AL_.jpg",
     "https://m.media-amazon.com/images/M/MV5BMjc4OTc0ODgwNV5BMl5BanBnXkFtZTcwNjM1ODE0MQ@@._V1_UY209_CR0,0,140,209_AL_.jpg",
